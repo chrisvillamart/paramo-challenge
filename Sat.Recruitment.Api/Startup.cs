@@ -35,23 +35,9 @@ namespace Sat.Recruitment.Api
             RegisterServices(services);
             RegisterRepositoryServices(services);
             services.AddSwaggerGen();
+             
 
-            AutoMapperConfig.Configure();
-
-        }
-        public static class AutoMapperConfig
-        {
-            public static void Configure()
-            {
-                Mapper.Initialize(cfg =>
-                {
-                    cfg.CreateMap<UserDTO, User>();
-                    cfg.CreateMap<ResultDTO, Result>();
-                    cfg.CreateMap<ErrorDTO, Error>();
-                });
-            }
-        }
-
+        } 
         private static void RegisterServices(IServiceCollection services)
         {
             services.AddScoped<IUserService, UserService>();

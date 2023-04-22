@@ -38,7 +38,7 @@ namespace Sat.Recruitment.Test
             var mapper = new Mapper(mapperConfig);
             _userService = new UserService(appSettings, mapper, _userRepository);
 
-            // Crea una instancia de EjemploController
+            // Crea una instancia de UserController
             _controller = new UsersController(_userService);
         }
         public class AutoMapperProfile : Profile
