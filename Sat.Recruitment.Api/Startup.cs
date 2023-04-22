@@ -1,15 +1,18 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Sat.Recruitment.Api.DTO;
+using Sat.Recruitment.Api.Services.UserModule;
+using Sat.Recruitment.Configuration.Configuration;
+using Sat.Recruitment.Domain;
+using Sat.Recruitment.Infraestructure.Repositories;
+using System; 
 
 namespace Sat.Recruitment.Api
 {
@@ -22,14 +25,42 @@ namespace Sat.Recruitment.Api
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.AddMvc();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddAutoMapper();
+            RegisterServices(services);
+            RegisterRepositoryServices(services);
             services.AddSwaggerGen();
+
+            AutoMapperConfig.Configure();
+
+        }
+        public static class AutoMapperConfig
+        {
+            public static void Configure()
+            {
+                Mapper.Initialize(cfg =>
+                {
+                    cfg.CreateMap<UserDTO, User>();
+                    cfg.CreateMap<ResultDTO, Result>();
+                    cfg.CreateMap<ErrorDTO, Error>();
+                });
+            }
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        private static void RegisterServices(IServiceCollection services)
+        {
+            services.AddScoped<IUserService, UserService>();
+        }
+        private static void RegisterRepositoryServices(IServiceCollection services)
+        {
+            services.AddScoped<IUserRepository, UserRepository>();
+        } 
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -38,8 +69,6 @@ namespace Sat.Recruitment.Api
             }
             app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-            // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");

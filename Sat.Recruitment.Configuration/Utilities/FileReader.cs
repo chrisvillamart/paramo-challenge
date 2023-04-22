@@ -1,11 +1,13 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
-namespace Sat.Recruitment.Api.Controllers
+namespace Sat.Recruitment.Configuration.Utilities
 {
-    public partial class UsersController
+    public class FileReader
     {
-        private StreamReader ReadUsersFromFile()
+        public static StreamReader ReadUsersFromFile()
         {
             var path = Directory.GetCurrentDirectory() + "/Files/Users.txt";
 
