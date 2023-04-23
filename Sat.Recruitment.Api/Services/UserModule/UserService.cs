@@ -9,6 +9,8 @@ using AutoMapper;
 using Sat.Recruitment.Domain;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Sat.Recruitment.Configuration.Utilities;
 
 namespace Sat.Recruitment.Api.Services.UserModule
 {
@@ -30,27 +32,32 @@ namespace Sat.Recruitment.Api.Services.UserModule
             resultDto.Errors = new List<ErrorDTO>();
             if (userDTO.Name == null)
             {
-                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Name, _appSettings.NameError.ToString()));
+                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Name, _appSettings.NameError));
                 resultDto.IsSuccess = false;
             }
                
             if (userDTO.Email == null)
             {
-                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Name, _appSettings.EmailError.ToString()));
+                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Name, _appSettings.EmailError));
                 resultDto.IsSuccess = false;
             }
                 
             if (userDTO.Address == null)
             {
-                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Name, _appSettings.AddressError.ToString()));
+                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Name, _appSettings.AddressError));
                 resultDto.IsSuccess = false;
             }
             if (userDTO.Phone == null)
             { 
-                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Name, _appSettings.PhoneError.ToString()));
+                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Name, _appSettings.PhoneError));
                 resultDto.IsSuccess = false;
             }
 
+            resultDto.IsSuccess = StringUtils.IsValidEmail(userDTO.Email);
+            if (!resultDto.IsSuccess)
+            {
+                resultDto.Errors.Add(new ErrorDTO(ErrorTypes.Email, _appSettings.EmailFormatError)); 
+            }
              
             if(resultDto.IsSuccess)
             {

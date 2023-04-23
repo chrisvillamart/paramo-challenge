@@ -22,5 +22,11 @@
     <ProjectReference Include="..\Sat.Recruitment.Infraestructure\Sat.Recruitment.Infraestructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\users.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 
 </Project>

@@ -7,6 +7,9 @@ using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using Sat.Recruitment.Domain.Enum;
 using System.Threading.Tasks;
+using System.Net;
+using System.Numerics;
+using System.Xml.Linq;
 
 namespace Sat.Recruitment.Infraestructure.Repositories
 {
@@ -20,75 +23,38 @@ namespace Sat.Recruitment.Infraestructure.Repositories
         }
         public Task<Result> CreateUser(User user)
         {
-             List<User> _users = new List<User>();
              Result result = new Result();
              result.IsSuccess = true;
              result.Errors = new List<Error>();
-            if (user.UserType == _appSettings.Normal.ToString() )
-            {
-                if (user.Money > 100)
-                {
-                    var percentage = Convert.ToDecimal(0.12);
-                    var gif = user.Money * percentage;
-                    user.Money = user.Money + gif;
-                }
-                if (user.Money < 100)
-                {
-                    if (user.Money > 10)
-                    {
-                        var percentage = Convert.ToDecimal(0.8);
-                        var gif = user.Money * percentage;
-                        user.Money = user.Money + gif;
-                    }
-                }
-            }
-            if (user.UserType == _appSettings.SuperUser.ToString())
-            {
-                if (user.Money > 100)
-                {
-                    var percentage = Convert.ToDecimal(0.20);
-                    var gif = user.Money * percentage;
-                    user.Money = user.Money + gif;
-                }
-            }
-            if (user.UserType == _appSettings.Premium.ToString())
-            {
-                if (user.Money > 100)
-                {
-                    var gif = user.Money * 2;
-                    user.Money = user.Money + gif;
-                }
-            }
 
 
-            var reader = FileReader.ReadUsersFromFile();
+             StringUtils.NormalizeEmail(user.Email);
 
-            user.Email = StringUtils.NormalizeEmail(user.Email);
-            
-            while (reader.Peek() >= 0)
-            {
-                var line = reader.ReadLineAsync().Result;
-                var User = new User
-                {
-                    Name = line.Split(',')[0].ToString(),
-                    Email = line.Split(',')[1].ToString(),
-                    Phone = line.Split(',')[2].ToString(),
-                    Address = line.Split(',')[3].ToString(),
-                    UserType = line.Split(',')[4].ToString(),
-                    Money = decimal.Parse(line.Split(',')[5].ToString()),
-                };
-                _users.Add(User);
+             var gift = CalculateGift(user);
+             user.Money += gift;
+             
+            var rowList = FileReader.ReadFromFile(',', _appSettings.FileRoute);
+            var _users = new List<User>();
+
+            foreach (var row in rowList) {
+                var userLine = new User();
+                userLine.Name = row[0].ToString();
+                userLine.Email = row[1].ToString();
+                userLine.Phone = row[2].ToString();
+                userLine.Address = row[3].ToString();
+                userLine.UserType = row[4].ToString();
+                userLine.Money = decimal.Parse(row[5].ToString());
+                _users.Add(userLine);
             }
-            reader.Close();
-
+              
             foreach (var userList in _users)
-            {
-                var duplicationMessage = _appSettings.UserDuplicated.ToString();
+            {   
+                var duplicationMessage = _appSettings.UserDuplicated;
                 if (user.Email == userList.Email || user.Phone == userList.Phone)
                 {
                     Debug.WriteLine($"{duplicationMessage} {user.Email} {user.Phone} ");
                     result.IsSuccess = false;
-                    result.Errors.Add(new Error(ErrorTypes.Duplication, _appSettings.UserDuplicated.ToString()));
+                    result.Errors.Add(new Error(ErrorTypes.Duplication, _appSettings.UserDuplicated));
                 }
                 else if (user.Name == userList.Name)
                 {
@@ -96,7 +62,7 @@ namespace Sat.Recruitment.Infraestructure.Repositories
                     {
                         Debug.WriteLine($"{duplicationMessage} {user.Name} {user.Address} ");
                         result.IsSuccess = false;
-                        result.Errors.Add(new Error(ErrorTypes.Duplication, _appSettings.UserDuplicated.ToString()));
+                        result.Errors.Add(new Error(ErrorTypes.Duplication, _appSettings.UserDuplicated));
                     }
 
                 }
@@ -104,11 +70,33 @@ namespace Sat.Recruitment.Infraestructure.Repositories
 
             if (result.IsSuccess)
             {
-                Debug.WriteLine(_appSettings.UserCreated.ToString());
+                Debug.WriteLine(_appSettings.UserCreated);
             }
 
 
             return Task.FromResult(result); 
+        }
+
+        private decimal CalculateGift(User user)
+        {
+
+            decimal gif = 0;
+            var rules = new List<Func<User, decimal>>
+            {
+                (u) => u.UserType == _appSettings.Normal && u.Money > 100 ? u.Money * 0.12m :  0,
+
+                (u) => u.UserType == _appSettings.Normal && (u.Money < 100 && u.Money > 10)  ? u.Money * 0.8m : 0,
+
+                (u) => u.UserType == _appSettings.SuperUser && u.Money > 100 ? u.Money * 0.20m : 0,
+
+                (u) => u.UserType == _appSettings.Premium && u.Money > 100 ? u.Money * 2 : 0
+            };
+
+            foreach (var rule in rules)
+            {
+                gif += rule(user);
+            }
+            return gif;
         }
     }
 }

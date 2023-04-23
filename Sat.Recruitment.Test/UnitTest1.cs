@@ -32,7 +32,7 @@ namespace Sat.Recruitment.Test
 
             // Crea una instancia de UserService
             var appSettings = Options.Create(new AppSettings("The name is required", "The email is required",
-                "The address is required", "The phone is required", "Normal", "SuperUser", "Premium", "User Created" , "User Duplicated"));
+                "The address is required", "The phone is required", "Normal", "SuperUser", "Premium", "User Created" , "User Duplicated", "/Resources/Users.txt", "The email format is incorrect"));
             var _userRepository = new UserRepository(appSettings);
             var mapperConfig = new MapperConfiguration(c => c.AddProfile(new AutoMapperProfile()));
             var mapper = new Mapper(mapperConfig);

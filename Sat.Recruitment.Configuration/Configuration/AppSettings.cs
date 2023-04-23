@@ -5,7 +5,7 @@ namespace Sat.Recruitment.Configuration.Configuration
     public class AppSettings
     {
         public AppSettings() { }
-        public AppSettings(string nameError, string emailError, string addressError, string phoneError, object normal, object superUser, object premium, object userCreated, object userDuplicated)
+        public AppSettings(string nameError, string emailError, string addressError, string phoneError, string normal, string superUser, string premium, string userCreated, string userDuplicated, string fileRoute, string emailFormatError)
         {
             NameError = nameError;
             EmailError = emailError;
@@ -16,15 +16,19 @@ namespace Sat.Recruitment.Configuration.Configuration
             Premium = premium;
             UserCreated = userCreated;
             UserDuplicated = userDuplicated;
+            FileRoute = fileRoute;
+            EmailFormatError = emailFormatError;
         }
         public string NameError { get; set; }
         public string EmailError { get; set; }
         public string AddressError { get; set; }
         public string PhoneError { get; set; }
-        public object Normal { get; set; }
-        public object SuperUser { get; set; }
-        public object Premium { get; set; }
-        public object UserCreated { get; set; }
-        public object UserDuplicated { get; set; }
+        public string Normal { get; set; }
+        public string SuperUser { get; set; }
+        public string Premium { get; set; }
+        public string UserCreated { get; set; }
+        public string UserDuplicated { get; set; }
+        public string FileRoute { get; set; }
+        public string EmailFormatError { get; set; }
     }
 }
